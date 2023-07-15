@@ -29,14 +29,13 @@ def type_search(locator):
 
 
 def select_categories():
-    breakpoint()
     section_items = browser_lib.get_webelements("class:css-1qtb2wd")
     for item in section_items:
         print(f"item: {item}")
         print(f"txt: {item.text}")
         for category in NEWS_CATEGORY:
             print(f"{category}, {NEWS_CATEGORY}")
-            match = re.search(r"\bSports\b", item.text, re.IGNORECASE)
+            match = re.search(category, item.text, re.IGNORECASE)
             if match:
                 item.click()
     sleep(4)
@@ -47,7 +46,6 @@ def close_browser():
 
 
 def main():
-    breakpoint()
     """Start main function for RPA for news search"""
     open_the_website(NYTIMES_URL)
     click(BREADCRUMB_BUTTON)
