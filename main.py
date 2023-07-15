@@ -1,3 +1,4 @@
+import re
 from time import sleep
 from RPA.Browser.Selenium import Selenium
 from constants import (
@@ -7,8 +8,6 @@ from constants import (
     NYTIMES_URL,
     SEARCH_BUTTON,
     SEARCH_PHRASE,
-    SECTION_BUTTON,
-    SECTION_CATEGORIES,
 )
 
 browser_lib = Selenium()
@@ -30,15 +29,16 @@ def type_search(locator):
 
 
 def select_categories():
+    breakpoint()
     section_items = browser_lib.get_webelements("class:css-1qtb2wd")
     for item in section_items:
-        print("item", item)
-        print("txt", item.text)
+        print(f"item: {item}")
+        print(f"txt: {item.text}")
         for category in NEWS_CATEGORY:
             print(f"{category}, {NEWS_CATEGORY}")
-            if category == browser_lib.get_text(item):
+            match = re.search(r"\bSports\b", item.text, re.IGNORECASE)
+            if match:
                 item.click()
-
     sleep(4)
 
 
@@ -47,6 +47,7 @@ def close_browser():
 
 
 def main():
+    breakpoint()
     """Start main function for RPA for news search"""
     open_the_website(NYTIMES_URL)
     click(BREADCRUMB_BUTTON)
