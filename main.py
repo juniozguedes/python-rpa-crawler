@@ -1,6 +1,15 @@
 from time import sleep
 from RPA.Browser.Selenium import Selenium
-from constants import BREADCUMB_BUTTON, NYTIMES_URL, SEARCH_BUTTON, SEARCH_PHRASE
+from constants import (
+    BREADCRUMB_BUTTON,
+    CATEGORY_SELECTION,
+    NEWS_CATEGORY,
+    NYTIMES_URL,
+    SEARCH_BUTTON,
+    SEARCH_PHRASE,
+    SECTION_BUTTON,
+    SECTION_CATEGORIES,
+)
 
 browser_lib = Selenium()
 
@@ -9,29 +18,46 @@ def open_the_website(url):
     browser_lib.open_available_browser(url)
 
 
-def click():
-    browser_lib.click_element_when_visible(BREADCUMB_BUTTON)
+def click(locator):
+    browser_lib.click_element_when_visible(locator)
 
 
-def search_for():
+def type_search(locator):
     search_input = "name:query"
-    browser_lib.click_element_when_visible(SEARCH_BUTTON)
-    browser_lib.input_text(search_input, SEARCH_PHRASE)
+    click(SEARCH_BUTTON)
+    browser_lib.input_text(search_input, locator)
     browser_lib.press_keys(search_input, "ENTER")
-    sleep(1)  # Wait for suggestions or search results to appear
 
 
-def close_browser(self) -> None:
+def select_categories():
+    browser_lib.click_element_when_visible(SECTION_BUTTON)
+    section_items = browser_lib.get_webelements(SECTION_CATEGORIES)
+    print(f"section itens: {section_items}")
+    for item in section_items:
+        print(item)
+        for category in NEWS_CATEGORY:
+            print(f"{category}, {NEWS_CATEGORY}")
+            if category == browser_lib.get_text(item):
+                item.click()
+
+    sleep(4)
+
+
+def close_browser():
     browser_lib.close_browser()
 
 
 def main():
     """Start main function for RPA for news search"""
     open_the_website(NYTIMES_URL)
-    sleep(4)
-    click()
-    search_for()
+    click(BREADCRUMB_BUTTON)
+    type_search(SEARCH_PHRASE)
+    click(CATEGORY_SELECTION)
+    sleep(10)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    finally:
+        close_browser()
