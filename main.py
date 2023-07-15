@@ -33,10 +33,7 @@ def type_search(search_phrase):
 def select_categories(category_section):
     section_items = browser_lib.get_webelements(category_section)
     for item in section_items:
-        print(f"item: {item}")
-        print(f"txt: {item.text}")
         for category in NEWS_CATEGORY:
-            print(f"{category}, {NEWS_CATEGORY}")
             match = re.search(category, item.text, re.IGNORECASE)
             if match:
                 item.click()
@@ -45,15 +42,14 @@ def select_categories(category_section):
 
 def iterate_news(news_selection):
     breakpoint()
+    news_response = []
     section_items = browser_lib.get_webelements(news_selection)
-    for item in section_items:
-        print(f"item: {item}")
-        print(f"txt: {item.text}")
-        for category in NEWS_CATEGORY:
-            print(f"{category}, {NEWS_CATEGORY}")
-            match = re.search(category, item.text, re.IGNORECASE)
-            if match:
-                item.click()
+    for li_element in section_items:
+        div_element = li_element.find_element('xpath', './/div[@class="css-1bdu3ax"]')
+        date_span_element = div_element.find_element('xpath', './/span[@class="css-17ubb9w"]')
+        
+        news_date = date_span_element.text
+
     sleep(4)
 
 
@@ -63,7 +59,6 @@ def close_browser():
 
 def main():
     """Start main function for RPA for news search"""
-    breakpoint()
     open_the_website(NYTIMES_URL)
     click(BREADCRUMB_BUTTON)
     type_search(SEARCH_PHRASE)
