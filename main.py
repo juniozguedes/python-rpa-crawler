@@ -30,11 +30,10 @@ def type_search(locator):
 
 
 def select_categories():
-    browser_lib.click_element_when_visible(SECTION_BUTTON)
-    section_items = browser_lib.get_webelements(SECTION_CATEGORIES)
-    print(f"section itens: {section_items}")
+    section_items = browser_lib.get_webelements("class:css-1qtb2wd")
     for item in section_items:
-        print(item)
+        print("item", item)
+        print("txt", item.text)
         for category in NEWS_CATEGORY:
             print(f"{category}, {NEWS_CATEGORY}")
             if category == browser_lib.get_text(item):
@@ -53,6 +52,7 @@ def main():
     click(BREADCRUMB_BUTTON)
     type_search(SEARCH_PHRASE)
     click(CATEGORY_SELECTION)
+    select_categories()
     sleep(10)
 
 
