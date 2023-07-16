@@ -1,3 +1,4 @@
+import os
 import re
 from time import sleep
 from RPA.Browser.Selenium import Selenium
@@ -41,15 +42,43 @@ def select_categories(category_section):
 
 
 def iterate_news(news_selection):
-    breakpoint()
     news_response = []
     section_items = browser_lib.get_webelements(news_selection)
     for li_element in section_items:
-        div_element = li_element.find_element('xpath', './/div[@class="css-1bdu3ax"]')
-        date_span_element = div_element.find_element('xpath', './/span[@class="css-17ubb9w"]')
-        
-        news_date = date_span_element.text
+        div_element_1 = li_element.find_element('xpath', './/div[@class="css-1bdu3ax"]')
+        date_span_element = div_element_1.find_element('xpath', './/span[@class="css-17ubb9w"]')
+        div_element_2 = div_element_1.find_element('xpath', './/div[@class="css-1i8vfl5"]')
+        div_element_3 = div_element_2.find_element('xpath', './/div[@class="css-e1lvw9"]')
 
+        figure_element = div_element_2.find_element('xpath', './/figure[@class="css-tap2ym"]')
+        div = figure_element.find_element('xpath', './/div') 
+
+        title_h4_element =  div_element_3.find_element('xpath', '//h4[@class="css-2fgx4k"]')
+        description_p_element = div_element_3.find_element('xpath', '//p[@class="css-16nhkrn"]')
+        image_element = div.find_element('xpath','//img[@class="css-rq4mmj"]')
+
+        # Get the value of the src attribute
+        src_value = image_element.get_attribute("src")
+
+        news_date = date_span_element.text
+        news_title = title_h4_element.text
+        news_description = description_p_element.text
+        picture_filename = os.path.splitext(os.path.basename(src_value))[0]
+        title_count = news_title.count(SEARCH_PHRASE)
+        description_count = news_description.count(SEARCH_PHRASE)
+        phrase_count = title_count + description_count
+
+        # Define the regex pattern for matching money amounts
+        money_pattern = r"\$[\d,]+(\.\d+)?|\d+(\.\d+)? dollars|\d+(\.\d+)? USD"
+
+        # Check if the title contains any amount of money
+        title_has_money = bool(re.search(money_pattern, news_title))
+
+        # Check if the description contains any amount of money
+        description_has_money = bool(re.search(money_pattern, news_description))
+
+        # Check if either title or description has money
+        has_money = title_has_money or description_has_money
     sleep(4)
 
 
