@@ -1,7 +1,9 @@
 import os
 import re
+import requests
 import pandas as pd
 from time import sleep
+from urllib.parse import urlparse
 from datetime import datetime, timedelta
 from RPA.Browser.Selenium import Selenium
 from constants import (
@@ -45,6 +47,11 @@ def select_categories(category_section):
     sleep(4)
 
 
+def clean_filename(filename):
+    # Remove any invalid characters from the filename
+    return re.sub(r"[^a-zA-Z0-9_-]", "", filename)
+
+
 def iterate_news(news_selection):
     news_response = []
     section_items = browser_lib.get_webelements(news_selection)
@@ -69,7 +76,6 @@ def iterate_news(news_selection):
             "xpath", './/p[@class="css-16nhkrn"]'
         )
         image_element = div.find_element("xpath", './/img[@class="css-rq4mmj"]')
-
         # Get the value of the src attribute
         src_value = image_element.get_attribute("src")
 
@@ -77,10 +83,26 @@ def iterate_news(news_selection):
         news_title = title_h4_element.text
         news_description = description_p_element.text
         picture_filename = os.path.splitext(os.path.basename(src_value))[0]
+        # Clean the picture filename
+        picture_filename = clean_filename(picture_filename)
+        # Extract the filename from the URL without query parameters
+        parsed_url = urlparse(src_value)
+        filename_without_params = os.path.basename(parsed_url.path)
 
         title_count = news_title.count(SEARCH_PHRASE)
         description_count = news_description.count(SEARCH_PHRASE)
         phrase_count = title_count + description_count
+
+        # Download the image and save it to the "root" folder
+        image_url = src_value
+        image_response = requests.get(image_url)
+        image_extension = os.path.splitext(filename_without_params)[
+            1
+        ]  # Get the file extension from the URL
+        image_path = os.path.join("img", f"{picture_filename}{image_extension}")
+
+        with open(image_path, "wb") as f:
+            f.write(image_response.content)
 
         # Define the regex pattern for matching money amounts
         money_pattern = r"\$[\d,]+(\.\d+)?|\d+(\.\d+)? dollars|\d+(\.\d+)? USD"
