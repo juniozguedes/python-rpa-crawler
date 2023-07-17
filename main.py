@@ -1,5 +1,6 @@
 import os
 import re
+import pandas as pd
 from time import sleep
 from datetime import datetime, timedelta
 from RPA.Browser.Selenium import Selenium
@@ -45,33 +46,29 @@ def select_categories(category_section):
 
 
 def iterate_news(news_selection):
-    breakpoint()
     news_response = []
     section_items = browser_lib.get_webelements(news_selection)
     for li_element in section_items:
-        div_element_1 = li_element.find_element("xpath", './/div[@class="css-1bdu3ax"]')
-        date_span_element = div_element_1.find_element(
-            "xpath", './/span[@class="css-17ubb9w"]'
+        date_span_element = li_element.find_element(
+            "xpath", ".//span[@class='css-17ubb9w']"
         )
-        div_element_2 = div_element_1.find_element(
-            "xpath", './/div[@class="css-1i8vfl5"]'
-        )
+        div_element_2 = li_element.find_element("xpath", ".//div[@class='css-1i8vfl5']")
         div_element_3 = div_element_2.find_element(
-            "xpath", './/div[@class="css-e1lvw9"]'
+            "xpath", ".//div[@class='css-e1lvw9']"
         )
 
         figure_element = div_element_2.find_element(
-            "xpath", './/figure[@class="css-tap2ym"]'
+            "xpath", ".//figure[@class='css-tap2ym']"
         )
         div = figure_element.find_element("xpath", ".//div")
 
         title_h4_element = div_element_3.find_element(
-            "xpath", '//h4[@class="css-2fgx4k"]'
+            "xpath", './/h4[@class="css-2fgx4k"]'
         )
         description_p_element = div_element_3.find_element(
-            "xpath", '//p[@class="css-16nhkrn"]'
+            "xpath", './/p[@class="css-16nhkrn"]'
         )
-        image_element = div.find_element("xpath", '//img[@class="css-rq4mmj"]')
+        image_element = div.find_element("xpath", './/img[@class="css-rq4mmj"]')
 
         # Get the value of the src attribute
         src_value = image_element.get_attribute("src")
@@ -80,6 +77,7 @@ def iterate_news(news_selection):
         news_title = title_h4_element.text
         news_description = description_p_element.text
         picture_filename = os.path.splitext(os.path.basename(src_value))[0]
+
         title_count = news_title.count(SEARCH_PHRASE)
         description_count = news_description.count(SEARCH_PHRASE)
         phrase_count = title_count + description_count
@@ -95,7 +93,30 @@ def iterate_news(news_selection):
 
         # Check if either title or description has money
         has_money = title_has_money or description_has_money
-    sleep(4)
+        news_response.append(
+            {
+                "date": news_date,
+                "title": news_title,
+                "description": news_description,
+                "picture_filename": picture_filename,
+                "count_of_search_phrases": phrase_count,
+                "has_money": has_money,
+            }
+        )
+    breakpoint()
+    # Get the path of the main.py script
+    script_path = os.path.abspath(__file__)
+
+    # Get the project root folder path
+    project_root = os.path.dirname(script_path)
+    # Convert the list of dictionaries to a DataFrame
+    df = pd.DataFrame(news_response)
+
+    # Define the Excel file path within the project root folder
+    excel_file_path = os.path.join(project_root, "news.xlsx")
+
+    # Save the DataFrame to an Excel file
+    df.to_excel(excel_file_path, index=False)
 
 
 def select_dates(months):
@@ -142,7 +163,6 @@ def main():
     click(CATEGORY_SELECTION)
     select_categories(CATEGORY_SECTION)
     click(DATE_SELECTION)
-    breakpoint()
     select_dates(MONTHS)
     sleep(4)
     iterate_news(NEWS_SELECTION)
