@@ -103,7 +103,6 @@ def iterate_news(news_selection):
                 "has_money": has_money,
             }
         )
-    breakpoint()
     # Get the path of the main.py script
     script_path = os.path.abspath(__file__)
 
