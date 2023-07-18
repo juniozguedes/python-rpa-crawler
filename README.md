@@ -12,6 +12,14 @@ Dependencies are listed in requirements.txt
 pip install -r requirements.txt
 ```
 
+Alternatively you can use conda:
+
+```
+conda create -n python-news-crawler python=3.9
+conda activate python-news-crawler
+conda env update -f conda.yaml
+```
+
 # Run the crawler
 
 To start the application we want to execute the main.py file
