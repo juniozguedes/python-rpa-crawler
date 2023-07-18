@@ -2,8 +2,6 @@
 
 Dependencies are listed in requirements.txt
 
-- For this project I'm only using:
-
 - pandas to generate excel
 - configparser to store general environment
 - pydantic for data validation and typing
