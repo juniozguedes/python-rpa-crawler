@@ -45,7 +45,7 @@ def select_categories(category_section, NEWS_CATEGORY):
             match = re.search(category, item.text, re.IGNORECASE)
             if match:
                 item.click()
-    sleep(4)
+    sleep(2)
 
 
 def clean_filename(filename):
@@ -87,7 +87,8 @@ def get_post_title(element):
 
 
 def iterate_news(news_selection, SEARCH_PHRASE):
-    # load_more_news()
+    # If you don't wish to load and save ALL news from all pages, comment below
+    load_more_news()
     news_response = []
     section_items = browser_lib.get_webelements(news_selection)
     for li_element in section_items:
@@ -116,11 +117,16 @@ def iterate_news(news_selection, SEARCH_PHRASE):
             # Download the image and save it to the "root" folder
             image_url = src_value
             image_response = requests.get(image_url)
-            image_extension = os.path.splitext(filename_without_params)[
-                1
-            ]  # Get the file extension from the URL
-            image_path = os.path.join("img", f"{picture_filename}{image_extension}")
+            image_extension = os.path.splitext(filename_without_params)[1]
+            # Define the directory path for images
+            image_dir = os.path.join("src", SEARCH_PHRASE, "img")
 
+            # Create the directory if it doesn't exist
+            if not os.path.exists(image_dir):
+                os.makedirs(image_dir)
+
+            # Now, you can write the image to the file
+            image_path = os.path.join(image_dir, f"{picture_filename}{image_extension}")
             with open(image_path, "wb") as f:
                 f.write(image_response.content)
         except NoSuchElementException:
@@ -165,10 +171,12 @@ def iterate_news(news_selection, SEARCH_PHRASE):
     df = pd.DataFrame(news_response)
 
     # Define the Excel file path within the project root folder
-    excel_file_path = os.path.join(project_root, "news.xlsx")
+    excel_file_path = os.path.join(f"{project_root}/src/{SEARCH_PHRASE}", "news.xlsx")
 
     # Save the DataFrame to an Excel file
     df.to_excel(excel_file_path, index=False)
+
+    return True
 
 
 def select_dates(months):
@@ -230,4 +238,8 @@ def setup(request: NewsRequest):
     click(DATE_SELECTION)
     select_dates(request.months)
     sleep(4)
-    iterate_news(NEWS_SELECTION, request.search_phrase)
+    if iterate_news(NEWS_SELECTION, request.search_phrase):
+        print("Script ran successfuly")
+        return True
+    print("Error iterating news")
+    return False
