@@ -27,7 +27,6 @@ def open_the_website(url):
 
 
 def click(locator):
-    breakpoint()
     browser_lib.click_element_when_visible(locator)
 
 
@@ -238,7 +237,6 @@ def click_button_with_class(class_name):
 
 
 def setup(request: NewsRequest):
-    breakpoint()
     open_the_website(NYTIMES_URL)
     click_button_with_class("css-aovwtd")
     click_breadcrumb(BREADCRUMB_BUTTON, request.search_phrase)
