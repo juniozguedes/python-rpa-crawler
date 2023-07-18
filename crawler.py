@@ -27,12 +27,22 @@ def open_the_website(url):
 
 
 def click(locator):
+    breakpoint()
     browser_lib.click_element_when_visible(locator)
+
+
+def click_breadcrumb(locator, search_phrase):
+    try:
+        browser_lib.click_element_when_visible(locator)
+        type_search(search_phrase)
+    except AssertionError:
+        print("Assertion error because browser is fullscreen")
+        type_search(search_phrase)
 
 
 def type_search(search_phrase):
     search_input = "name:query"
-    click(SEARCH_BUTTON)
+    click_button_with_class("css-tkwi90")
     browser_lib.input_text(search_input, search_phrase)
     browser_lib.press_keys(search_input, "ENTER")
 
@@ -228,10 +238,10 @@ def click_button_with_class(class_name):
 
 
 def setup(request: NewsRequest):
+    breakpoint()
     open_the_website(NYTIMES_URL)
     click_button_with_class("css-aovwtd")
-    click(BREADCRUMB_BUTTON)
-    type_search(request.search_phrase)
+    click_breadcrumb(BREADCRUMB_BUTTON, request.search_phrase)
     if request.news_category:
         click(CATEGORY_SELECTION)
         select_categories(CATEGORY_SECTION, request.news_category)
