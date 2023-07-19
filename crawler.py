@@ -15,7 +15,6 @@ from constants import (
     DATE_SELECTION,
     NEWS_SELECTION,
     NYTIMES_URL,
-    SEARCH_BUTTON,
 )
 from schemas import NewsRequest
 
@@ -31,6 +30,8 @@ def click(locator):
 
 
 def click_breadcrumb(locator, search_phrase):
+    """Check if the browser is fullscreen or not by
+    selecting the correct button"""
     try:
         browser_lib.click_element_when_visible(locator)
         type_search(search_phrase)
@@ -47,7 +48,12 @@ def type_search(search_phrase):
 
 
 def select_categories(category_section, NEWS_CATEGORY):
-    # Beter work can be done here to replace category for None if NA
+    """Select and match categories from NEWS_CATEGORY input WorkItem
+    params:
+    category_section: the css locator for the categories
+    NEWS_CATEGORY: WorkInput declaring the categories eg.: ["Sports"]
+
+    """
     section_items = browser_lib.get_webelements(category_section)
     for item in section_items:
         for category in NEWS_CATEGORY:
@@ -63,6 +69,7 @@ def clean_filename(filename):
 
 
 def load_more_news():
+    """Checks if there is the ~load more~ button on the bottom"""
     while True:
         load_more_buttons = browser_lib.get_webelements("class:css-vsuiox")
         if not load_more_buttons:
@@ -78,6 +85,10 @@ def load_more_news():
 
 
 def get_post_description(element):
+    """Get the body of the post
+    params:
+    element: webdriver element containing p
+    """
     try:
         description_p_element = element.find_element(
             "xpath", './/p[@class="css-16nhkrn"]'
@@ -88,6 +99,10 @@ def get_post_description(element):
 
 
 def get_post_title(element):
+    """Get the title of the post
+    params:
+    element: webdriver element containing h4
+    """
     try:
         title_h4_element = element.find_element("xpath", './/h4[@class="css-2fgx4k"]')
         return title_h4_element.text
@@ -96,20 +111,28 @@ def get_post_title(element):
 
 
 def iterate_news(news_selection, SEARCH_PHRASE):
+    """Loops through all news posts saving the excel and images
+    params:
+    news_selection: The class locator containing the div of posts
+    SEARCH_PHRASE: WorkItem input for searching the news by string
+    """
     # If you don't wish to load and save ALL news from all pages, comment below
     load_more_news()
     news_response = []
     section_items = browser_lib.get_webelements(news_selection)
     for li_element in section_items:
+        # Navigate through necessary divs for post handling (div 1,2,3)
         date_span_element = li_element.find_element(
             "xpath", ".//span[@class='css-17ubb9w']"
         )
-        div_element_2 = li_element.find_element("xpath", ".//div[@class='css-1i8vfl5']")
-        div_element_3 = div_element_2.find_element(
+        div_element_1 = li_element.find_element("xpath", ".//div[@class='css-1i8vfl5']")
+        div_element_2 = div_element_1.find_element(
             "xpath", ".//div[@class='css-e1lvw9']"
         )
+
+        # Try to get and handle the image part by retrieving the figure
         try:
-            figure_element = div_element_2.find_element(
+            figure_element = div_element_1.find_element(
                 "xpath", ".//figure[@class='css-tap2ym']"
             )
             div = figure_element.find_element("xpath", ".//div")
@@ -134,7 +157,7 @@ def iterate_news(news_selection, SEARCH_PHRASE):
             if not os.path.exists(image_dir):
                 os.makedirs(image_dir)
 
-            # Now, you can write the image to the file
+            # Write the image to the file
             image_path = os.path.join(image_dir, f"{picture_filename}{image_extension}")
             with open(image_path, "wb") as f:
                 f.write(image_response.content)
@@ -142,8 +165,8 @@ def iterate_news(news_selection, SEARCH_PHRASE):
             src_value = "NA"
             picture_filename = "NA"
 
-        news_title = get_post_title(div_element_3)
-        news_description = get_post_description(div_element_3)
+        news_title = get_post_title(div_element_2)
+        news_description = get_post_description(div_element_2)
 
         news_date = date_span_element.text
         title_count = news_title.count(SEARCH_PHRASE)
@@ -237,15 +260,21 @@ def click_button_with_class(class_name):
 
 
 def setup(request: NewsRequest):
+    """Orchestrate robot functions"""
     open_the_website(NYTIMES_URL)
+    # Reject cookies
     click_button_with_class("css-aovwtd")
+    # Click on breadcrumb and check if it's fullscreen or not
     click_breadcrumb(BREADCRUMB_BUTTON, request.search_phrase)
+    # Select category if there is any
     if request.news_category:
         click(CATEGORY_SELECTION)
         select_categories(CATEGORY_SECTION, request.news_category)
+    # Handle dates
     click(DATE_SELECTION)
     select_dates(request.months)
     sleep(4)
+    # Check if iterate news returns success
     if iterate_news(NEWS_SELECTION, request.search_phrase):
         print("Script ran successfuly")
         return True

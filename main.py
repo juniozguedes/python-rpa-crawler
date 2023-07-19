@@ -13,6 +13,8 @@ def initialize_config():
 
 
 def check_dependencies():
+    """Checks if the src folder exists
+    This folder will be responsible for the Vault part"""
     root_directory = os.getcwd()
     folder_name = "src"
     folder_path = os.path.join(root_directory, folder_name)
@@ -24,8 +26,8 @@ def check_dependencies():
 
 
 def main():
-    """Start main function for RPA for news search"""
-    # Initialize the configuration
+    """Start main function for RPA for news search^
+    Initialize env variables and global configs"""
     config = initialize_config()
     check_dependencies()
     # Accessing values from the configuration
