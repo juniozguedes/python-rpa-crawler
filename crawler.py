@@ -35,13 +35,13 @@ def click_breadcrumb(locator, search_phrase):
         browser_lib.click_element_when_visible(locator)
         type_search(search_phrase)
     except AssertionError:
-        print("Assertion error because browser is fullscreen")
+        print("Browser detected fullscreen activity")
+        click_button_with_class("css-tkwi90")
         type_search(search_phrase)
 
 
 def type_search(search_phrase):
     search_input = "name:query"
-    click_button_with_class("css-tkwi90")
     browser_lib.input_text(search_input, search_phrase)
     browser_lib.press_keys(search_input, "ENTER")
 
